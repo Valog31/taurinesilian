@@ -1,0 +1,26 @@
+CREATE TABLE User_(
+   ID VARCHAR(50),
+   name VARCHAR(50),
+   lastname VARCHAR(50),
+   PRIMARY KEY(ID)
+);
+
+CREATE TABLE Materials(
+   Id_material VARCHAR(50),
+   name_material VARCHAR(50),
+   state VARCHAR(50),
+   quantity VARCHAR(50),
+   PRIMARY KEY(Id_material)
+);
+
+CREATE TABLE Reservation(
+   Id_reservation VARCHAR(50),
+   Statut VARCHAR(50),
+   start_date VARCHAR(50),
+   end_date VARCHAR(50),
+   ID VARCHAR(50) NOT NULL,
+   Id_material VARCHAR(50) NOT NULL,
+   PRIMARY KEY(Id_reservation),
+   FOREIGN KEY(ID) REFERENCES User_(ID),
+   FOREIGN KEY(Id_material) REFERENCES Materials(Id_material)
+);
