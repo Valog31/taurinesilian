@@ -1,3 +1,21 @@
+## Exercice 1
+
+code pg admin : 
+
+Insert INTO User_(ID, name, lastname)
+Values ('o22103022t', 'Ilian', 'Taurines');
+
+
+
+select * from User_;
+
+
+### Explication des choix du MLD 
+
+
+
+## Code LDD généré 
+
 CREATE TABLE User_(
    ID VARCHAR(50),
    name VARCHAR(50),
