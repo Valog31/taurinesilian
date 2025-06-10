@@ -1,15 +1,13 @@
+-- EXERCICE 6 : Supprimer des données
 
-Requête 1 — Supprimer une réservation spécifique
-    Exemple : supprimer la réservation avec ID res_001
-    DELETE FROM Reservation
-    WHERE Id_reservation = 'res_001';
+-- Requête de suppression d’une réservation existante (res_005)
+DELETE FROM Reservation
+WHERE Id_reservation = 'res_005';
 
+-- Requête de suppression des réservations dont la date de retour prévue est déjà passée
+DELETE FROM Reservation
+WHERE end_date < CURRENT_DATE;
 
-
-Requête 2 — Supprimer toutes les réservations dont la date de fin est passée
-    DELETE FROM Reservation
-    WHERE end_date < CURRENT_DATE;
-
-
-
-
+-- Commentaire :
+-- La première requête supprime la réservation 5.
+-- La deuxième supprime toutes les réservations dont la fin est inférieure à aujourd’hui.

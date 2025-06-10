@@ -1,38 +1,33 @@
-1. Utilisateurs ayant emprunté au moins un équipement
 
-SELECT DISTINCT u.ID, u.name, u.lastname
-FROM User_ u
-JOIN Reservation r ON u.ID = r.ID;
+-- EXERCICE 7 : Requêtes avancées
 
+-- 1. Afficher tous les utilisateurs ayant emprunté au moins un équipement
+SELECT DISTINCT User_.ID, name, lastname
+FROM User_
+JOIN Reservation ON User_.ID = Reservation.ID;
 
+-- 2. Afficher les équipements n’ayant jamais été empruntés
+SELECT *
+FROM Materials
+WHERE Id_material NOT IN (
+    SELECT Id_material FROM Reservation
+);
 
-2. Équipements jamais empruntés
+-- 3. Afficher les équipements ayant été empruntés plus de 3 fois
+SELECT Id_material, COUNT(*) AS nb_emprunts
+FROM Reservation
+GROUP BY Id_material
+HAVING COUNT(*) > 3;
 
-SELECT m.Id_material, m.name_material
-FROM Materials m
-LEFT JOIN Reservation r ON m.Id_material = r.Id_material
-WHERE r.Id_reservation IS NULL;
+-- 4. Afficher le nombre d’emprunts pour chaque utilisateur, y compris ceux qui n’ont rien emprunté
+SELECT User_.ID, name, lastname, COUNT(Reservation.Id_reservation) AS nb_emprunts
+FROM User_
+LEFT JOIN Reservation ON User_.ID = Reservation.ID
+GROUP BY User_.ID, name, lastname
+ORDER BY User_.ID;
 
-
-
-3. Équipements empruntés plus de 3 fois
-
-SELECT m.Id_material, m.name_material, COUNT(r.Id_reservation) AS nb_reservations
-FROM Materials m
-JOIN Reservation r ON m.Id_material = r.Id_material
-GROUP BY m.Id_material, m.name_material
-HAVING COUNT(r.Id_reservation) > 3;
-
-
-
-4. Nombre d’emprunts par utilisateur (y compris ceux à 0)
-
-SELECT 
-    u.ID, 
-    u.name, 
-    u.lastname, 
-    COUNT(r.Id_reservation) AS nb_emprunts
-FROM User_ u
-LEFT JOIN Reservation r ON u.ID = r.ID
-GROUP BY u.ID, u.name, u.lastname
-ORDER BY u.ID;
+-- Commentaire :
+-- On utilise ici des jointures, des agrégations et des filtres 
+-- Pour les équipements jamais empruntés, on compare avec les réservations 
+-- Pour les emprunts > 3, on groupe par matériel et on mets HAVING.
+-- La dernière requête utilise LEFT JOIN pour mêttre les utilisateurs sans emprunt.

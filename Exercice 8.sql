@@ -1,99 +1,51 @@
+-- EXERCICE 8 : Gestion des réservations avec contraintes de disponibilité
 
-##  1. Créer la table `Disponibilite`
-
-```sql
+-- 1. Création de la table Disponibilite
 CREATE TABLE Disponibilite (
     id_disponibilite SERIAL PRIMARY KEY,
-    id_material VARCHAR(50) REFERENCES Materials(Id_material),
+    id_materiel VARCHAR(10) REFERENCES Materials(Id_material),
     date_debut DATE,
     date_fin DATE
 );
-```
 
----
-
-##  2. Modifier la table `Reservation`
-
-Ajoute une colonne `id_disponibilite` liée à la table `Disponibilite` :
-
-```sql
+-- 2. Ajout d’une colonne dans la table Reservation pour référencer la disponibilité utilisée
 ALTER TABLE Reservation
-ADD COLUMN id_disponibilite INT REFERENCES Disponibilite(id_disponibilite);
-```
+ADD COLUMN id_disponibilite INTEGER REFERENCES Disponibilite(id_disponibilite);
 
----
+-- 3. Exemple d’insertion de disponibilités
+INSERT INTO Disponibilite (id_materiel, date_debut, date_fin) VALUES
+('mat_001', '2024-06-01', '2024-06-15'),
+('mat_002', '2024-06-05', '2024-06-20');
 
-##  3. Vérifier la disponibilité d’un matériel avant réservation
-
-> Exemple : vérifier si le matériel `mat_001` est disponible du `2024-05-15` au `2024-05-20`.
-
-```sql
+-- 4. Vérifier si un matériel est disponible pour une période donnée. Exemple : mat_001 demandé du 2024-06-10 au 2024-06-14
 SELECT
-  CASE
-    WHEN EXISTS (
-      SELECT 1
-      FROM Disponibilite d
-      WHERE d.id_material = 'mat_001'
-        AND d.date_debut <= DATE '2024-05-15'
-        AND d.date_fin >= DATE '2024-05-20'
-    )
-    THEN 'OK'
-    ELSE 'KO'
-  END AS est_disponible;
-```
+    CASE
+        WHEN '2024-06-10' >= date_debut AND '2024-06-14' <= date_fin
+        THEN 'OK'
+        ELSE 'KO'
+    END AS disponibilite_statut
+FROM Disponibilite
+WHERE id_materiel = 'mat_001';
 
----
+-- 5. Exemple d’insertion d’une réservation avec contrainte de disponibilité respectée 
+INSERT INTO Reservation (Id_reservation, Statut, start_date, end_date, ID, Id_material, id_disponibilite)
+VALUES ('res_006', 'active', '2024-06-10', '2024-06-14', '006', 'mat_001', 1);
 
-##  4. Gérer les disponibilités (admin)
+-- 6. Gestion des disponibilités par les administrateurs (Ajouter une disponibilité)
+INSERT INTO Disponibilite (id_materiel, date_debut, date_fin)
+VALUES ('mat_003', '2024-07-01', '2024-07-10');
 
-###  Ajouter une disponibilité
-
-```sql
-INSERT INTO Disponibilite (id_material, date_debut, date_fin)
-VALUES ('mat_001', '2024-05-10', '2024-05-30');
-```
-
-### ✏ Modifier une période
-
-```sql
+-- Modifier une disponibilité 
 UPDATE Disponibilite
-SET date_fin = '2024-06-01'
-WHERE id_disponibilite = 1;
-```
+SET date_fin = '2024-07-15'
+WHERE id_disponibilite = 3;
 
-###  Supprimer une période
-
-```sql
+-- Supprimer une disponibilité
 DELETE FROM Disponibilite
-WHERE id_disponibilite = 1;
-```
+WHERE id_disponibilite = 2;
 
----
-
-##  5. Exemple complet : réserver un matériel **seulement si disponible**
-
-Voici un script qui simule cette logique :
-
-```sql
-DO $$
-DECLARE
-  dispo_id INT;
-BEGIN
-  SELECT id_disponibilite INTO dispo_id
-  FROM Disponibilite
-  WHERE id_material = 'mat_001'
-    AND date_debut <= DATE '2024-05-15'
-    AND date_fin >= DATE '2024-05-20'
-  LIMIT 1;
-
-  IF dispo_id IS NOT NULL THEN
-    INSERT INTO Reservation (Id_reservation, Statut, start_date, end_date, ID, Id_material, id_disponibilite)
-    VALUES ('res_test', 'active', '2024-05-15', '2024-05-20', '001', 'mat_001', dispo_id);
-  ELSE
-    RAISE NOTICE 'Matériel non disponible pour cette période.';
-  END IF;
-END $$;
-```
-
----
-
+-- Commentaire :
+-- On ajoute une contrainte à la réservation :
+-- on ne peut réserver un matériel non dispo sur la période demandée.
+-- On lie la réservation à une période de disponibilité via une clé étrangère.
+-- Les admins peuvent aussi gérer les plages
